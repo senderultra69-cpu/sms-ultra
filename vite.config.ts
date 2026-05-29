@@ -5,7 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/sender_ultra/',
+    base: '/sms-ultra/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
