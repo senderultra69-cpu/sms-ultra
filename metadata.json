@@ -1,0 +1,6 @@
+{
+  "name": "Ultra Sender",
+  "description": "A professional, full-stack bulk SMS shortcut console configured with dynamic template builders, Easy Send API integration, custom HTTP gateways, smart recharges with transparent commission cuts, and live rate parameters.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
