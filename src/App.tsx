@@ -13,7 +13,7 @@ import { ShieldAlert, Send, LayoutDashboard, Sliders, Smartphone, Users, FileSig
 const LOCAL_STORAGE_PREFIX = 'eims_sms_';
 
 const INITIAL_USERS: SmsUser[] = [
-  { id: 'usr_admin', name: 'System Admin (Main)', email: 'admin@ultrasender.com', password: 'admin', balance: 1450.00, role: 'admin', createdAt: new Date().toISOString(), isActive: true },
+  { id: 'usr_admin', name: 'System Admin (Main)', email: 'senderultra69@gmail.com', password: 'admin', balance: 1450.00, role: 'admin', createdAt: new Date().toISOString(), isActive: true },
   { id: 'usr_user1', name: 'Ravi Verma (Client)', email: 'user@ultrasender.com', password: 'user', balance: 45.30, role: 'user', createdAt: new Date().toISOString(), isActive: true },
   { id: 'usr_user2', name: 'Preeti Sharma', email: 'preeti@gmail.com', password: 'user', balance: 180.00, role: 'user', createdAt: new Date().toISOString(), isActive: true }
 ];
@@ -215,7 +215,20 @@ export default function App() {
 
   const [users, setUsers] = useState<SmsUser[]>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_PREFIX + 'users');
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as SmsUser[];
+        return parsed.map(u => {
+          if (u.id === 'usr_admin' && u.email === 'admin@ultrasender.com') {
+            return { ...u, email: 'senderultra69@gmail.com' };
+          }
+          return u;
+        });
+      } catch (e) {
+        return INITIAL_USERS;
+      }
+    }
+    return INITIAL_USERS;
   });
 
   const [systemConfig, setSystemConfig] = useState<SystemConfig>(() => {
@@ -241,6 +254,52 @@ export default function App() {
   const currentUser = useMemo(() => {
     return users.find(u => u.id === currentUserId) || users[0] || INITIAL_USERS[0];
   }, [users, currentUserId]);
+
+  // Profile Modal State
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profilePassword, setProfilePassword] = useState('');
+  const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
+  const [profileErrorMsg, setProfileErrorMsg] = useState('');
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSuccessMsg('');
+    setProfileErrorMsg('');
+
+    if (!profileName.trim() || !profileEmail.trim() || !profilePassword.trim()) {
+      setProfileErrorMsg('All fields are required.');
+      return;
+    }
+
+    // Check if email taken
+    const emailTaken = users.some(u => u.id !== currentUserId && u.email.toLowerCase() === profileEmail.toLowerCase().trim());
+    if (emailTaken) {
+      setProfileErrorMsg('This email login ID is already taken by another user.');
+      return;
+    }
+
+    const updatedUsers = users.map(u => {
+      if (u.id === currentUserId) {
+        return {
+          ...u,
+          name: profileName.trim(),
+          email: profileEmail.trim(),
+          password: profilePassword.trim()
+        };
+      }
+      return u;
+    });
+
+    setUsers(updatedUsers);
+    setProfileSuccessMsg('Dynamic profile and credentials updated successfully!');
+
+    setTimeout(() => {
+      setIsProfileOpen(false);
+      setProfileSuccessMsg('');
+    }, 1500);
+  };
 
   // SAVING TO LOCALSTORAGE ON MUTATION
   useEffect(() => {
@@ -942,6 +1001,20 @@ export default function App() {
 
           <button
             onClick={() => {
+              setProfileName(currentUser.name);
+              setProfileEmail(currentUser.email);
+              setProfilePassword(currentUser.password);
+              setIsProfileOpen(true);
+            }}
+            className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/50 rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition-all transition-colors cursor-pointer select-none"
+            title="Update name, login email or security password"
+          >
+            <UserCog size={11} />
+            <span className="hidden sm:inline">My Profile</span>
+          </button>
+
+          <button
+            onClick={() => {
               setIsLoggedIn(false);
             }}
             className="flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/50 rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition-all transition-colors cursor-pointer select-none"
@@ -1129,6 +1202,107 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Dynamic Profile Settings Modal */}
+      {isProfileOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-indigo-50 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                  <UserCog size={16} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Profile & Security Settings</h3>
+                  <p className="text-[10px] text-slate-400">Edit active session login keys</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setIsProfileOpen(false);
+                  setProfileSuccessMsg('');
+                  setProfileErrorMsg('');
+                }}
+                className="text-slate-400 hover:text-slate-600 font-bold transition-colors cursor-pointer text-lg leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Full Display Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="e.g. System Admin"
+                  className="w-full text-xs px-3 py-2 border border-slate-250 rounded-lg outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white font-sans text-slate-800"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Login Email ID</label>
+                <input 
+                  type="email" 
+                  required 
+                  value={profileEmail}
+                  onChange={(e) => setProfileEmail(e.target.value)}
+                  placeholder="senderultra69@gmail.com"
+                  className="w-full text-xs px-3 py-2 border border-slate-250 rounded-lg outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white font-mono text-slate-850 font-bold"
+                />
+                <span className="text-[9px] text-slate-400 leading-tight">This will be your new email ID used to login at the gateway.</span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-sans">Active Password security-key</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={profilePassword}
+                  onChange={(e) => setProfilePassword(e.target.value)}
+                  placeholder="Enter new secure password"
+                  className="w-full text-xs px-3 py-2 border border-slate-250 rounded-lg outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white font-mono text-slate-850 font-bold"
+                />
+                <span className="text-[9px] text-slate-400 leading-tight">Enter a secure token. This changes your gateway lock-key immediately.</span>
+              </div>
+
+              {profileErrorMsg && (
+                <div className="p-2.5 bg-red-50 text-red-700 border border-red-100 rounded-lg text-[10px] leading-normal font-sans">
+                  ⚠️ {profileErrorMsg}
+                </div>
+              )}
+
+              {profileSuccessMsg && (
+                <div className="p-2.5 bg-emerald-50 text-emerald-850 border border-emerald-150 rounded-lg text-[10px] leading-normal font-bold font-sans">
+                  ✅ {profileSuccessMsg}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    setProfileSuccessMsg('');
+                    setProfileErrorMsg('');
+                  }}
+                  className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold rounded-lg transition-colors cursor-pointer text-xs"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white font-extrabold rounded-lg shadow-sm hover:shadow transition-all cursor-pointer text-xs"
+                >
+                  Save Profile Settings
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
