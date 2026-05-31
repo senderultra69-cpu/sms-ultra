@@ -458,94 +458,16 @@ export default function LoginPortal({ users, onLoginSuccess }: LoginPortalProps)
           </button>
         </form>
 
-        {/* Account credential helper */}
-        <div className="mt-6 border-t border-white/[0.08] pt-4 flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-[11px] text-slate-400">
-            <span className="flex items-center gap-1 text-[10.5px]">
-              <Info size={11} className="text-indigo-400" /> Default Portal Users
-            </span>
-            <button
-              onClick={() => setRevealHelper(!revealHelper)}
-              className="text-[10px] text-indigo-400 font-bold hover:underline"
-            >
-              {revealHelper ? 'Hide credentials panel' : 'Show login credentials'}
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {revealHelper && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-white/[0.04]"
-              >
-                {/* Admin user */}
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-slate-300">admin@ultrasender.com</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] bg-indigo-950 text-indigo-300 px-1 py-0.2 rounded border border-indigo-900/40">Role: Admin</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmail('admin@ultrasender.com');
-                        setPassword('admin');
-                        setStatus('idle');
-                      }}
-                      className="text-[9.5px] font-bold text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      ⚡ Apply
-                    </button>
-                  </div>
-                </div>
-
-                {/* Regular user */}
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-slate-300">user@ultrasender.com</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] bg-slate-900 text-slate-300 px-1 py-0.2 rounded border border-slate-700/40">Role: User</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmail('user@ultrasender.com');
-                        setPassword('user');
-                        setStatus('idle');
-                      }}
-                      className="text-[9.5px] font-bold text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      ⚡ Apply
-                    </button>
-                  </div>
-                </div>
-
-                {/* Secondary user */}
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-slate-300">preeti@gmail.com</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] bg-slate-900 text-slate-300 px-1 py-0.2 rounded border border-slate-700/40">Role: User</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmail('preeti@gmail.com');
-                        setPassword('user');
-                        setStatus('idle');
-                      }}
-                      className="text-[9.5px] font-bold text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      ⚡ Apply
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Corporate Gateway Secure Indicator */}
+        <div className="mt-6 pt-2 text-center text-[10px] text-slate-500 font-mono flex justify-center items-center gap-1">
+          <ShieldCheck size={11} className="text-emerald-500" /> 256-bit Secure Gateway
         </div>
 
       </motion.div>
 
       {/* Corporate Gateway Secure Indicator */}
-      <div className="text-[10px] text-slate-500 font-mono mt-4 flex items-center gap-1.5 z-10 select-none">
-        <ShieldCheck size={12} className="text-emerald-500" /> Ultra Sender SSL Multi-User Security Isolated 2026
+      <div className="text-[10px] text-slate-600 font-mono mt-4 flex items-center gap-1.5 z-10 select-none">
+        <ShieldCheck size={12} className="text-slate-500" /> Ultra Sender SSL Multi-User Security Isolated 2026
       </div>
 
     </div>
