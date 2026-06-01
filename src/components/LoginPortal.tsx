@@ -409,7 +409,7 @@ export default function LoginPortal({ users, onLoginSuccess }: LoginPortalProps)
                 onChange={handleInputChange}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
-                placeholder="e.g. admin@ultrasender.com"
+                placeholder="e.g. senderultra69@gmail.com"
                 className="w-full text-xs text-slate-200 bg-slate-950/55 border border-white/10 rounded-xl py-3 pl-3 pr-4 outline-none focus:border-indigo-500 focus:bg-slate-950 font-mono transition-all"
               />
             </div>
