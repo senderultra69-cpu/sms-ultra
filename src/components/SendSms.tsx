@@ -16,6 +16,15 @@ interface SendSmsProps {
 }
 
 export default function SendSms({ contacts, groups, templates, activeGateway, smsCostPerPart, onSendSms }: SendSmsProps) {
+  // Check if we are in a pure static workspace preview deployment (e.g. GitHub Pages)
+  const isStaticHost = useMemo(() => {
+    return (
+      window.location.hostname.includes('github.io') ||
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname === ''
+    );
+  }, []);
+
   const [phoneNumberInput, setPhoneNumberInput] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -310,8 +319,30 @@ export default function SendSms({ contacts, groups, templates, activeGateway, sm
   };
 
   return (
-    <div id="sms-sender" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Compose and Target Side */}
+    <div className="space-y-6">
+      {/* CORS Alert Banner for Pure Static Hosts */}
+      {isStaticHost && activeGateway.id !== 'mock' && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-4 rounded-r-xl shadow-xs space-y-1.5 animate-in fade-in duration-300">
+          <div className="flex items-start gap-2.5">
+            <div className="mt-0.5 p-1 bg-amber-100 rounded text-amber-700 shrink-0">
+              <Info size={15} />
+            </div>
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-wider text-amber-800">CORS Carrier Routing Blockage (Active Gateway: {activeGateway.name})</h4>
+              <p className="text-[11px] text-amber-900/95 leading-relaxed">
+                You are currently running in a statically-hosted client environment (<span className="font-mono bg-amber-100 px-1 rounded text-amber-950 font-bold">{window.location.hostname}</span>). 
+                Web security policies strictly block direct client-side requests from browsers to modern payment/SMS API endpoints. Direct fetches will fail inside your browser sandbox with a CORS error, resulting in <span className="font-mono bg-red-100 px-1 rounded text-red-900 font-bold">Failed</span> logs.
+              </p>
+              <p className="text-[10.5px] text-amber-800 font-semibold leading-relaxed mt-1">
+                🚀 <strong>To deliver actual text messages:</strong> Please launch this application on a container platform (e.g. Cloud Run, Render) or run the included Node.js server using <code className="text-[10px] bg-amber-100 px-1 rounded">npm run dev</code>. The server proxy routes your messages server-to-server, bypassing browser limitations seamlessly! Or toggle <em>Active Gateway: Mock Sandbox Dispatcher</em> to simulate delivered success.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div id="sms-sender" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Compose and Target Side */}
       <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-xs lg:col-span-7 space-y-5">
         <div className="flex items-center justify-between border-b border-rose-50/10 pb-4">
           <div>
@@ -683,6 +714,7 @@ Alice: +85292345678
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

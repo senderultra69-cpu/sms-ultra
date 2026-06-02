@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasySend Bulk SMS Broadcaster</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono-jetbrains {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 h-14 flex items-center px-4 sm:px-6 justify-between shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white">
+                <i data-lucide="send" class="w-4 h-4"></i>
+            </div>
+            <div>
+                <span class="font-bold text-base tracking-tight text-slate-900">EasySend SMS Broadcaster</span>
+                <span class="hidden sm:inline-block ml-2 text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">GitHub Standalone Edition</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-xs text-slate-500 hover:text-indigo-600 font-medium transition-colors flex items-center gap-1">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Deep Portal
+            </a>
+            <div id="api-status-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-500">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> API Status: Unconfigured
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        
+        <!-- Intro Hero Header Section -->
+        <div class="bg-indigo-950 text-white rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+            <div class="space-y-2 z-10">
+                <span class="text-xs bg-indigo-500/30 text-indigo-200 font-extrabold tracking-widest uppercase px-3 py-1 rounded-full">Static SMS Dispatcher</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Direct Client-Side Gateway Portal</h1>
+                <p class="text-sm text-indigo-100 max-w-2xl leading-relaxed">
+                    Host this single file anywhere (like GitHub Pages, Netlify, or local folder) to broadcast customized messages instantly. No backend servers, databases, or complex configurations needed. Just enter your API Key and dispatch!
+                </p>
+            </div>
+            <div class="z-10 flex gap-2 sm:gap-3">
+                <button onclick="restoreDemoCredentials()" class="bg-indigo-900 hover:bg-brand-600 border border-indigo-700 text-xs text-indigo-100 hover:text-white px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Load Demo Setup
+                </button>
+            </div>
+            <!-- Background Accent Shapes -->
+            <div class="absolute -right-16 -bottom-16 w-64 h-64 bg-brand-600 rounded-full opacity-10 blur-3xl"></div>
+            <div class="absolute right-1/3 top-2 w-48 h-48 bg-indigo-500 rounded-full opacity-10 blur-2xl"></div>
+        </div>
+
+        <!-- Alert regarding browser CORS policies -->
+        <div class="bg-amber-50 border-l-4 border-amber-500 rounded-r-xl p-4 text-xs text-amber-900 shadow-xs space-y-1">
+            <div class="flex gap-2.5 items-start">
+                <div class="mt-0.5 p-1 bg-amber-100 rounded text-amber-700 shrink-0">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-amber-800 uppercase tracking-wider text-[10px]">Security Notice: Direct Browser Fetches & CORS Policies</h4>
+                    <p class="leading-relaxed mt-0.5 text-[11px]">
+                        This utility runs directly inside your internet browser to make requests directly to <strong>restapi.easysendsms.app</strong>. 
+                        Depending on your browser security sandbox and the gateway's headers, some API requests might face CORs preflight questions.
+                        If a request gets blocked, use your favorite open CORS proxy or enable our dynamic client-side fallback with a simple click.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interface Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left inputs panel -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- 1. Gateway Settings Section -->
+                <section class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <span class="p-1.5 bg-brand-50 text-brand-600 rounded-md">
+                            <i data-lucide="sliders" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">1. EasySend API Credentials Setup</h3>
+                            <p class="text-[11px] text-slate-400">These parameters will be securely stored in your personal local browser storage</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700" for="api-key-input">EasySend API Key *</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                                </span>
+                                <input type="password" id="api-key-input" oninput="saveCredentials()" placeholder="xssr1vs99am..." class="w-full text-xs bg-slate-50 focus:bg-white border border-slate-200 focus:border-brand-600 rounded-lg pl-9 pr-3 py-2.5 outline-hidden focus:ring-1 focus:ring-brand-600 font-mono" />
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700" for="sender-id-input">Sender Identifier (From) *</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                </span>
+                                <input type="text" id="sender-id-input" oninput="saveCredentials()" placeholder="ULTRA" class="w-full text-xs bg-slate-50 focus:bg-white border border-slate-200 focus:border-brand-600 rounded-lg pl-9 pr-3 py-2.5 outline-hidden focus:ring-1 focus:ring-brand-600 font-bold uppercase" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700" for="gateway-url-input">API Target Endpoint Endpoint URL</label>
+                            <input type="text" id="gateway-url-input" oninput="saveCredentials()" value="https://restapi.easysendsms.app/v1/rest/sms/send" placeholder="https://restapi.easysendsms.app..." class="w-full text-xs bg-slate-50 focus:bg-white border border-slate-200 focus:border-brand-600 rounded-lg px-3 py-2.5 outline-hidden focus:ring-1 focus:ring-brand-600 font-mono-jetbrains text-[10.5px]" />
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Contacts Upload & Parsing Section -->
+                <section class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 bg-brand-50 text-brand-600 rounded-md">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-sm">2. Target Audience & Contact Register</h3>
+                                <p class="text-[11px] text-slate-400">Parsed from quick copy-paste list or directly uploaded Excel / CSV files</p>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-brand-50 text-brand-700 font-bold py-1 px-2.5 rounded-lg">
+                            Parsed: <strong id="recipients-badge-count" class="font-mono text-sm text-brand-900">0</strong> Recipients
+                        </span>
+                    </div>
+
+                    <!-- Upload Area -->
+                    <div class="bg-indigo-50/40 border border-indigo-100 p-4 rounded-xl space-y-3.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-indigo-600"></i> Excel / CSV Bulk File Upload
+                            </span>
+                            <button onclick="downloadSampleCsv()" type="button" class="text-[9.5px] font-bold text-brand-600 hover:underline flex items-center gap-0.5">
+                                <i data-lucide="download" class="w-3 h-3"></i> Download Template CSV
+                            </button>
+                        </div>
+
+                        <!-- Real Drag & Drop Container -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <input type="file" id="csv-file-uploader" accept=".csv,text/csv" class="hidden" onchange="parseCsvUpload(this)" />
+                                <label for="csv-file-uploader" class="cursor-pointer border border-dashed border-indigo-300 hover:border-brand-600 bg-white/80 hover:bg-white p-4 rounded-xl text-center block transition-all group">
+                                    <i data-lucide="upload-cloud" class="w-7 h-7 mx-auto text-indigo-400 group-hover:text-brand-600 transition-colors mb-1.5"></i>
+                                    <span class="text-xs font-bold text-slate-800 block">Click to import CSV sheet</span>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5">Accepts column headers like "phone, name, message"</span>
+                                </label>
+                            </div>
+
+                            <div class="text-[10px] bg-white p-3 rounded-xl border border-indigo-100 flex flex-col justify-center">
+                                <span class="font-bold text-indigo-950">Example structure of spreadsheet:</span>
+                                <div class="font-mono-jetbrains text-[9px] text-slate-500 bg-slate-50 px-2 py-1.5 rounded mt-1 overflow-x-auto whitespace-nowrap border border-slate-200">
+phone,name,company,message
++919876543210,Ravi Verma,Aether,Hello {name} OTP is 4829
++919876543211,Preeti Sharma,Vertex,Hi {name} from {company}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="csv-success-wrap" class="hidden flex items-center justify-between bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg text-emerald-850">
+                            <span class="text-[11px] font-medium flex items-center gap-1.5">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                                <span id="csv-success-label">Parsed 0 row(s) safely</span>
+                            </span>
+                            <button onclick="clearCsvUpload()" class="p-1 hover:bg-emerald-100 text-rose-600 rounded transition-colors" title="Remove csv values">
+                                <i data-lucide="trash" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Manual input block -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-semibold text-slate-700" for="manual-phones-input">Or Paste Phone Numbers (One per line or comma separated)</label>
+                            <span class="text-[10px] text-slate-400 italic">Supports "Name: +9199999..." representation</span>
+                        </div>
+                        <textarea id="manual-phones-input" oninput="updateParsedRecipients()" rows="4" placeholder="Ex:&#10;+919876543210&#10;Alice: +919898989898&#10;+14155552671" class="w-full font-mono-jetbrains text-xs text-slate-700 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-brand-600 rounded-lg p-3 outline-hidden focus:ring-1 focus:ring-brand-600 transition-all placeholder:text-slate-300"></textarea>
+                    </div>
+                </section>
+
+                <!-- 3. Dynamic Message Composer -->
+                <section class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 bg-brand-50 text-brand-600 rounded-md">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-sm">3. Message Template Content Composer</h3>
+                                <p class="text-[11px] text-slate-400">Formulate your core message statement with dynamic replacement placeholders</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="insertPlaceholder('{name}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-brand-600 text-[10px] font-bold transition-all">+ {name}</button>
+                            <button onclick="insertPlaceholder('{company}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-brand-600 text-[10px] font-bold transition-all">+ {company}</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <textarea id="message-body" oninput="updateSmsMetrics()" rows="5" placeholder="Dear {name}, thank you for choosing {company}. Your scheduled system validation query is successful." class="w-full text-xs text-slate-750 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-brand-600 rounded-lg p-3.5 outline-hidden focus:ring-1 focus:ring-brand-600 transition-all placeholder:text-slate-300"></textarea>
+                    </div>
+
+                    <!-- Metrics bar -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-xl text-[10.5px] border border-slate-200/60">
+                        <div class="space-y-0.5">
+                            <span class="text-slate-400 font-medium">Text Length</span>
+                            <div class="font-bold text-slate-800"><span id="metric-chars" class="font-mono text-xs">0</span> Character(s)</div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <span class="text-slate-400 font-medium">GSM Segments</span>
+                            <div class="font-bold text-brand-600"><span id="metric-parts" class="font-mono text-xs">1</span> SMS part(s)</div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <span class="text-slate-400 font-medium">Encoding Type</span>
+                            <div id="metric-encoding" class="font-bold text-slate-700 font-mono text-[9px] uppercase tracking-wider">GSM-7 (Standard)</div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <span class="text-slate-400 font-medium">Audience Size</span>
+                            <div class="font-bold text-indigo-850"><span id="metric-contacts" class="font-mono text-xs">0</span> Recipient(s)</div>
+                        </div>
+                    </div>
+
+                    <!-- Dispatch triggers -->
+                    <div class="pt-2">
+                        <button id="btn-broadcast" onclick="executeBroadcast()" class="w-full bg-brand-600 hover:bg-brand-700 active:bg-brand-900 text-white font-bold text-xs py-3.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer select-none">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span>Broadcast Bulk SMS Now</span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right preview / log side -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Handset Mockup Preview -->
+                <div class="space-y-3.5">
+                    <h4 class="font-bold text-uppercase text-[10px] text-slate-500 tracking-widest flex items-center gap-1.5 uppercase">
+                        <i data-lucide="smartphone" class="w-3.5 h-3.5 text-indigo-500"></i> Interactive Handset Mockup
+                    </h4>
+
+                    <div class="bg-white rounded-[2.2rem] p-4 border-[8px] border-slate-300 shadow-lg flex flex-col min-h-[350px] relative overflow-hidden">
+                        <!-- Phone Notch -->
+                        <div class="w-1/3 h-4.5 bg-slate-300 rounded-b-xl mx-auto mb-3"></div>
+
+                        <!-- Inside content -->
+                        <div class="flex-1 flex flex-col gap-3">
+                            <div id="phone-preview-timestamp" class="text-center font-mono text-[9px] text-slate-400 uppercase mt-1">
+                                Today 00:00
+                            </div>
+
+                            <div id="preview-chat-container" class="space-y-2.5 overflow-y-auto max-h-[220px] px-1">
+                                <!-- Placeholders if empty -->
+                                <div id="preview-placeholder" class="text-center py-10 bg-slate-50 border border-dashed border-slate-100 rounded-xl">
+                                    <p class="text-xs font-bold text-slate-500">No recipient loaded</p>
+                                    <p class="text-[9.5px] text-slate-400 mt-1">Type in contacts & message body to view customized mock rendering</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phone fake message entry -->
+                        <div class="mt-auto pt-3 border-t border-slate-100 flex gap-2">
+                            <div class="flex-1 h-7.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] text-slate-400 flex items-center px-3 font-sans">iMessage</div>
+                            <div class="w-7.5 h-7.5 rounded-full bg-indigo-600 flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Execution Logs Output -->
+                <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 shadow-md space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Live Transmission Logs</span>
+                        </div>
+                        <button onclick="clearConsoleLogs()" class="text-[9px] font-bold text-slate-500 hover:text-slate-300 uppercase shrink-0 transition-colors">
+                            Clear Log
+                        </button>
+                    </div>
+
+                    <!-- Metrics results -->
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px] py-1.5 bg-slate-950/80 border border-slate-800 rounded-lg">
+                        <div>
+                            <span class="block text-slate-500">Sent</span>
+                            <strong id="log-stat-sent" class="block font-mono text-emerald-400 text-xs mt-0.5">0</strong>
+                        </div>
+                        <div>
+                            <span class="block text-slate-500">Failed</span>
+                            <strong id="log-stat-failed" class="block font-mono text-rose-500 text-xs mt-0.5">0</strong>
+                        </div>
+                        <div>
+                            <span class="block text-slate-500">Pending</span>
+                            <strong id="log-stat-pending" class="block font-mono text-amber-500 text-xs mt-0.5">0</strong>
+                        </div>
+                    </div>
+
+                    <!-- Actual scroll output element -->
+                    <div id="transmission-log-terminal" class="h-44 bg-black/50 overflow-y-auto rounded-lg p-3 font-mono-jetbrains text-[9.5px] text-slate-300 leading-relaxed whitespace-pre-wrap selection:bg-indigo-900">
+-- Ready to transmit. Configure API key and click Send. --
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer metrics info -->
+    <footer class="h-12 border-t border-slate-200 bg-white mt-8 flex items-center justify-between px-4 sm:px-8 text-[11px] text-slate-400">
+        <div>&copy; 2026 EasySend SMS Solutions Inc.</div>
+        <div class="flex gap-4">
+            <a href="#" class="hover:underline hover:text-slate-650">Developer Guidelines</a>
+            <span class="text-slate-300">|</span>
+            <a href="#" class="hover:underline hover:text-slate-650">CORS Handshake Helper</a>
+        </div>
+    </footer>
+
+    <!-- Vanilla Javascript Logic Core -->
+    <script>
+        // Memory variables
+        let parsedContacts = [];
+        let logSuccessCount = 0;
+        let logFailedCount = 0;
+
+        // Initialize lucide icons
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadCredentials();
+            restoreSystemTime();
+        });
+
+        function restoreSystemTime() {
+            try {
+                const now = new Date();
+                const text = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('phone-preview-timestamp').innerText = text;
+            } catch(e) {}
+        }
+
+        // Credentials local persistence helpers
+        function loadCredentials() {
+            const savedApiKey = localStorage.getItem('stand_easysend_api_key') || '';
+            const savedSenderId = localStorage.getItem('stand_easysend_sender_id') || 'SMSULTRA';
+            const savedUrl = localStorage.getItem('stand_easysend_url') || 'https://restapi.easysendsms.app/v1/rest/sms/send';
+
+            document.getElementById('api-key-input').value = savedApiKey;
+            document.getElementById('sender-id-input').value = savedSenderId;
+            document.getElementById('gateway-url-input').value = savedUrl;
+
+            updateBadgeStatus(savedApiKey);
+        }
+
+        function saveCredentials() {
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const senderId = document.getElementById('sender-id-input').value.trim() || 'SMSULTRA';
+            const url = document.getElementById('gateway-url-input').value.trim();
+
+            localStorage.setItem('stand_easysend_api_key', apiKey);
+            localStorage.setItem('stand_easysend_sender_id', senderId);
+            localStorage.setItem('stand_easysend_url', url);
+
+            updateBadgeStatus(apiKey);
+        }
+
+        function restoreDemoCredentials() {
+            document.getElementById('api-key-input').value = 'xssr1vs99amx1ulczo4zvnhcqrew66cv';
+            document.getElementById('sender-id-input').value = 'SMSULTRA';
+            document.getElementById('gateway-url-input').value = 'https://restapi.easysendsms.app/v1/rest/sms/send';
+            
+            saveCredentials();
+            appendTerminalOutput(`[SYSTEM] Demo API configurations and credentials populated successfully!`);
+        }
+
+        function updateBadgeStatus(apiKey) {
+            const badge = document.getElementById('api-status-badge');
+            if (apiKey) {
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> API: Configured (EasySend)`;
+                badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700";
+            } else {
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> API: Unconfigured`;
+                badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[10px] font-bold text-amber-700";
+            }
+        }
+
+        // CSV parsing utilities
+        function parseCsvUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                if (!text) return;
+
+                const lines = text.split(/\r?\n/);
+                if (lines.length === 0) return;
+
+                // Simple parser
+                const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('number') || h.includes('mobile'));
+                const nameIdx = headers.findIndex(h => h.includes('name'));
+                const companyIdx = headers.findIndex(h => h.includes('company') || h.includes('organization'));
+                const messageIdx = headers.findIndex(h => h.includes('message') || h.includes('text') || h.includes('sms'));
+
+                let count = 0;
+                let parsedRows = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const row = lines[i].trim();
+                    if (!row) continue;
+
+                    // Support quote escaping splitting
+                    const cols = [];
+                    let item = '';
+                    let inQuotes = false;
+                    for (let j = 0; j < row.length; j++) {
+                        const char = row[j];
+                        if (char === '"' || char === "'") {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            cols.push(item.trim());
+                            item = '';
+                        } else {
+                            item += char;
+                        }
+                    }
+                    cols.push(item.trim());
+
+                    const rawPhone = (phoneIdx !== -1 ? cols[phoneIdx] : cols[0]) || '';
+                    const cleanPhone = rawPhone.replace(/[^\d+]/g, '');
+                    const nameVal = (nameIdx !== -1 ? cols[nameIdx] : cols[1]) || 'Valued Client';
+                    const companyVal = (companyIdx !== -1 ? cols[companyIdx] : cols[2]) || '';
+                    const customMsg = messageIdx !== -1 ? cols[messageIdx] : '';
+
+                    if (cleanPhone) {
+                        parsedRows.push({
+                            phone: cleanPhone,
+                            name: nameVal,
+                            company: companyVal,
+                            customMessage: customMsg
+                        });
+                        count++;
+                    }
+                }
+
+                if (parsedRows.length > 0) {
+                    parsedContacts = parsedRows;
+                    
+                    // Show success
+                    const wrapper = document.getElementById('csv-success-wrap');
+                    wrapper.classList.remove('hidden');
+                    document.getElementById('csv-success-label').innerText = `Loaded ${count} bulk contact row(s) from CSV spreadsheet!`;
+
+                    appendTerminalOutput(`[CSV] Successfully uploaded CSV file containing ${count} entries.`);
+                    updateParsedRecipients();
+                } else {
+                    alert("Unable to parse contacts. Ensure first header row lists column names like 'phone, name'");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearCsvUpload() {
+            parsedContacts = [];
+            document.getElementById('csv-file-uploader').value = '';
+            document.getElementById('csv-success-wrap').classList.add('hidden');
+            
+            appendTerminalOutput(`[CSV] Bulk CSV upload purged.`);
+            updateParsedRecipients();
+        }
+
+        function downloadSampleCsv() {
+            const csvText = "phone,name,company,message\n+919876543210,John Doe,DeepTech,Hi John. Your VIP credentials token is confirmed.\n+919876543211,Jane Chang,AlphaSystems,Hi Jane from AlphaSystems.";
+            const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "easysend_demo_contacts.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Replacements compiler
+        function substituteTemplate(text, person) {
+            if (person.customMessage) {
+                return person.customMessage;
+            }
+            let output = text;
+            output = output.replace(/{name}/gi, person.name || 'Valued Client');
+            output = output.replace(/{company}/gi, person.company || 'Ultra Sender');
+            return output;
+        }
+
+        function insertPlaceholder(placeholder) {
+            const textarea = document.getElementById('message-body');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + placeholder + text.substring(end);
+            textarea.focus();
+            
+            updateSmsMetrics();
+        }
+
+        // Parse list and merge manually typed contacts + Uploaded CSV
+        function getCombinedRecipients() {
+            const list = [];
+            const manualText = document.getElementById('manual-phones-input').value.trim();
+
+            if (manualText) {
+                const lines = manualText.split(/[\n,;]+/);
+                lines.forEach(line => {
+                    const cleanLine = line.trim();
+                    if (cleanLine) {
+                        if (cleanLine.includes(':')) {
+                            const split = cleanLine.split(':');
+                            const name = split[0].trim();
+                            const phone = split[1].replace(/[^\d+]/g, '');
+                            if (phone) {
+                                list.push({ phone, name, company: '' });
+                            }
+                        } else {
+                            const phone = cleanLine.replace(/[^\d+]/g, '');
+                            if (phone) {
+                                list.push({ phone, name: 'Valued Client', company: '' });
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Append parsed spreadsheet contacts
+            parsedContacts.forEach(pc => {
+                list.push(pc);
+            });
+
+            // De-duplicate list by phone numbers
+            const map = new Map();
+            list.forEach(item => {
+                map.set(item.phone, item);
+            });
+
+            return Array.from(map.values());
+        }
+
+        function updateParsedRecipients() {
+            const list = getCombinedRecipients();
+            document.getElementById('recipients-badge-count').innerText = list.length;
+            document.getElementById('metric-contacts').innerText = list.length;
+
+            updatePhonePreviewMockup(list);
+            updateSmsMetrics();
+        }
+
+        // Render phone mockup chat list
+        function updatePhonePreviewMockup(contactsList) {
+            const container = document.getElementById('preview-chat-container');
+            const placeholder = document.getElementById('preview-placeholder');
+            const messageBody = document.getElementById('message-body').value || "Compose SMS preview...";
+
+            container.innerHTML = "";
+
+            if (contactsList.length === 0) {
+                container.appendChild(placeholder);
+                return;
+            }
+
+            // Show up to top 3 previews
+            const previews = contactsList.slice(0, 3);
+            previews.forEach(p => {
+                const customizedMessage = substituteTemplate(messageBody, p);
+                
+                const bubble = document.createElement('div');
+                bubble.className = "bg-slate-100 text-[11px] p-2.5 rounded-2xl rounded-tl-none self-start max-w-[95%] border border-slate-200 select-all font-sans relative shrink-0";
+                bubble.innerHTML = `
+                    <div class="font-extrabold text-indigo-700 text-[9px] mb-0.5 tracking-tight flex items-center justify-between">
+                        <span>SMS_GATEWAY</span>
+                        <span class="text-[8px] font-mono text-slate-400 font-normal ml-3">${p.phone}</span>
+                    </div>
+                    <div class="text-slate-800 leading-normal text-xs">${customizedMessage}</div>
+                `;
+                container.appendChild(bubble);
+            });
+
+            if (contactsList.length > 3) {
+                const extra = document.createElement('div');
+                extra.className = "text-center font-bold text-[8.5px] text-indigo-600 bg-indigo-50 py-1 rounded uppercase tracking-wider select-none shrink-0";
+                extra.innerText = `+ ${contactsList.length - 3} other customized parts queued`;
+                container.appendChild(extra);
+            }
+        }
+
+        // Message text length checker
+        function updateSmsMetrics() {
+            const text = document.getElementById('message-body').value;
+            const charsCount = text.length;
+            document.getElementById('metric-chars').innerText = charsCount;
+
+            const gsmRegex = /^[A-Za-z0-9\s!"#$%&'()*+,\-./:;<=>?@_¡£¥§¿äöñüàèòùìòÇØøÅå\n\r]*$/;
+            const isUnicode = !gsmRegex.test(text);
+
+            const encodingElem = document.getElementById('metric-encoding');
+            const partsElem = document.getElementById('metric-parts');
+
+            let maxSingle = 160;
+            let multiUnit = 153;
+
+            if (isUnicode) {
+                encodingElem.innerText = "Unicode (UCS-2)";
+                encodingElem.className = "font-bold text-amber-600 font-mono text-[9px] uppercase tracking-wider";
+                maxSingle = 70;
+                multiUnit = 67;
+            } else {
+                encodingElem.innerText = "GSM-7 (Standard)";
+                encodingElem.className = "font-bold text-slate-700 font-mono text-[9px] uppercase tracking-wider";
+            }
+
+            let parts = 1;
+            if (charsCount > maxSingle) {
+                parts = Math.ceil(charsCount / multiUnit);
+            }
+
+            partsElem.innerText = charsCount === 0 ? 0 : parts;
+
+            // Update live handset mockup as well
+            const combined = getCombinedRecipients();
+            updatePhonePreviewMockup(combined);
+        }
+
+        // Terminal Console Helpers
+        function appendTerminalOutput(line) {
+            const term = document.getElementById('transmission-log-terminal');
+            const now = new Date().toLocaleTimeString();
+            term.innerHTML += `\n[${now}] ${line}`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function clearConsoleLogs() {
+            document.getElementById('transmission-log-terminal').innerHTML = "-- Terminal cleared. Ready --";
+            logSuccessCount = 0;
+            logFailedCount = 0;
+            updateLogStats();
+        }
+
+        function updateLogStats() {
+            document.getElementById('log-stat-sent').innerText = logSuccessCount;
+            document.getElementById('log-stat-failed').innerText = logFailedCount;
+        }
+
+        // Broadcaster Core dispatcher
+        async function executeBroadcast() {
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const senderId = document.getElementById('sender-id-input').value.trim() || 'SMSULTRA';
+            const endpointUrl = document.getElementById('gateway-url-input').value.trim();
+            const messageBody = document.getElementById('message-body').value.trim();
+            const recipients = getCombinedRecipients();
+
+            // Forms validation
+            if (!apiKey) {
+                alert("Please provide your EasySend API Key in Gateway settings!");
+                return;
+            }
+            if (recipients.length === 0) {
+                alert("Please add at least one recipient phone number to send SMS!");
+                return;
+            }
+            if (!messageBody) {
+                alert("Please write a text message body template to transmit!");
+                return;
+            }
+
+            // Dispatch locks
+            const btn = document.getElementById('btn-broadcast');
+            btn.disabled = true;
+            btn.innerText = "Processing live transmission...";
+            btn.className = "w-full bg-slate-400 text-white font-bold text-xs py-3.5 px-4 rounded-xl cursor-not-allowed text-center";
+
+            appendTerminalOutput(`[BROADCAST] Commencing batch dispatch for ${recipients.length} target recipient(s)...`);
+
+            for (let i = 0; i < recipients.length; i++) {
+                const rec = recipients[i];
+                const customizedSms = substituteTemplate(messageBody, rec);
+                
+                appendTerminalOutput(`[OUTBOX] Sending to ${rec.name} (${rec.phone})...`);
+
+                try {
+                    // Assemble API Request payload matching EasySend REST API specification
+                    const payload = {
+                        api_key: apiKey,
+                        to: rec.phone,
+                        text: customizedSms,
+                        from: senderId
+                    };
+
+                    const response = await fetch(endpointUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const textData = await response.text();
+
+                    if (response.ok) {
+                        appendTerminalOutput(`[SUCCESS] Delivered to ${rec.phone}. Server response: ${textData.substring(0, 80)}`);
+                        logSuccessCount++;
+                    } else {
+                        // Display clean failed info
+                        appendTerminalOutput(`[ERROR] Gateways failed (Status: ${response.status}) for ${rec.phone}. Resp: ${textData.substring(0, 100)}`);
+                        logFailedCount++;
+                    }
+                } catch (err) {
+                    appendTerminalOutput(`[CONNECTION FALURE] Direct browser fetch failed for recipient: ${rec.phone}. Reason: ${err.message || err}`);
+                    appendTerminalOutput(`👉 Note: This might be due to Browser CORS policy blockages or wrong API Endpoints.`);
+                    logFailedCount++;
+                }
+
+                updateLogStats();
+            }
+
+            appendTerminalOutput(`[COMPLETED] Broadcaster batch transmission completed. Sent: ${logSuccessCount}, Failed: ${logFailedCount}.`);
+            
+            // Re-enable broadcast button
+            btn.disabled = false;
+            btn.innerText = "Broadcast Bulk SMS Now";
+            btn.className = "w-full bg-brand-600 hover:bg-brand-700 active:bg-brand-900 text-white font-bold text-xs py-3.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer";
+        }
+    </script>
+</body>
+</html>

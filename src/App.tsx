@@ -359,17 +359,17 @@ export default function App() {
 
       const updatedGateways = currentGateways.map(g => {
         if (g.id === 'easysend') {
-          if (
-            g.settings.easysendApiKey !== 'xssr1vs99amx1ulczo4zvnhcqrew66cv' ||
-            g.settings.easysendUrl !== 'https://restapi.easysendsms.app/v1/rest/sms/send'
-          ) {
+          // Fix: Only apply default API key/credentials on mount if they are completely missing
+          const hasNoKey = !g.settings || !g.settings.easysendApiKey;
+          const hasNoUrl = !g.settings || !g.settings.easysendUrl;
+          if (hasNoKey || hasNoUrl) {
             isUpdated = true;
             return {
               ...g,
               settings: {
                 ...g.settings,
-                easysendApiKey: 'xssr1vs99amx1ulczo4zvnhcqrew66cv',
-                easysendUrl: 'https://restapi.easysendsms.app/v1/rest/sms/send'
+                easysendApiKey: hasNoKey ? 'xssr1vs99amx1ulczo4zvnhcqrew66cv' : g.settings.easysendApiKey,
+                easysendUrl: hasNoUrl ? 'https://restapi.easysendsms.app/v1/rest/sms/send' : g.settings.easysendUrl
               }
             };
           }
@@ -377,9 +377,9 @@ export default function App() {
         return g;
       });
 
-      // Default the activeId to 'easysend' if it's currently on 'mock' or if it is unselected
+      // Fix: Only default activeId if the saved activeId is completely invalid or missing in list of gateways
       let nextActiveId = prev.activeId;
-      if (prev.activeId === 'mock' || !currentGateways.some(g => g.id === prev.activeId)) {
+      if (!currentGateways.some(g => g.id === prev.activeId)) {
         nextActiveId = 'easysend';
         isUpdated = true;
       }
@@ -945,6 +945,16 @@ export default function App() {
         onLoginSuccess={(userId) => {
           setCurrentUserId(userId);
           setIsLoggedIn(true);
+        }}
+        onResetAdminPassword={() => {
+          const updated = users.map(u => {
+            if (u.id === 'usr_admin') {
+              return { ...u, password: 'admin', email: 'senderultra69@gmail.com' };
+            }
+            return u;
+          });
+          setUsers(updated);
+          localStorage.setItem(LOCAL_STORAGE_PREFIX + 'users', JSON.stringify(updated));
         }}
       />
     );

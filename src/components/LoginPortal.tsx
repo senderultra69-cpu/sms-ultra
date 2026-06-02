@@ -6,15 +6,17 @@ import { LogIn, Eye, EyeOff, ShieldCheck, Mail, Lock, Info, Sparkles } from 'luc
 interface LoginPortalProps {
   users: SmsUser[];
   onLoginSuccess: (userId: string) => void;
+  onResetAdminPassword?: () => void;
 }
 
-export default function LoginPortal({ users, onLoginSuccess }: LoginPortalProps) {
+export default function LoginPortal({ users, onLoginSuccess, onResetAdminPassword }: LoginPortalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<'idle' | 'typing' | 'sad' | 'success'>('idle');
   const [errorText, setErrorText] = useState('');
   const [revealHelper, setRevealHelper] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   // Focus and eye movement tracker based on input length
   const [typingOffset, setTypingOffset] = useState(0);
@@ -420,6 +422,25 @@ export default function LoginPortal({ users, onLoginSuccess }: LoginPortalProps)
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 text-slate-300">
                 <Lock size={11} className="text-indigo-400" /> Security Token password
               </label>
+              {onResetAdminPassword && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onResetAdminPassword();
+                    setEmail('senderultra69@gmail.com');
+                    setPassword('admin');
+                    setErrorText('');
+                    setResetSuccess(true);
+                    setStatus('idle');
+                    setTimeout(() => {
+                      setResetSuccess(false);
+                    }, 8000);
+                  }}
+                  className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wider underline cursor-pointer"
+                >
+                  Reset Admin Password
+                </button>
+              )}
             </div>
             <div className="relative">
               <input
@@ -442,6 +463,17 @@ export default function LoginPortal({ users, onLoginSuccess }: LoginPortalProps)
               </button>
             </div>
           </div>
+
+          {resetSuccess && (
+            <div className="p-3.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-200 text-[11px] leading-relaxed font-sans space-y-1">
+              <div className="font-bold flex items-center gap-1 text-emerald-300">🎉 Admin Password Reset Successfully!</div>
+              <div>Admin credentials have been set back to default:</div>
+              <div className="font-mono text-[10px] bg-slate-950/50 p-2 rounded border border-white/5 mt-1 select-all">
+                Email: senderultra69@gmail.com<br/>
+                Password: admin
+              </div>
+            </div>
+          )}
 
           {errorText && (
             <div className="p-3 bg-red-950/80 border border-red-800/50 rounded-xl text-red-200 text-[11px] leading-normal font-sans">

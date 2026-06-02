@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { SmsLog, SmsMetrics, SmsUser, RechargeRequest, SystemConfig } from '../types';
-import { Send, CheckCircle2, AlertTriangle, Clock, Coins, Flame, ArrowRight, BarChart3, Copy, Check, Upload, ArrowUpRight, ShieldAlert, Sparkles, CreditCard, Landmark, Sliders } from 'lucide-react';
+import { Send, CheckCircle2, AlertTriangle, Clock, Coins, Flame, ArrowRight, BarChart3, Copy, Check, Upload, ArrowUpRight, ShieldAlert, Sparkles, CreditCard, Landmark, Sliders, Info } from 'lucide-react';
 
 interface DashboardProps {
   logs: SmsLog[];
@@ -23,6 +23,15 @@ export default function Dashboard({
   onNavigate,
   onUpdateRechargeRequests
 }: DashboardProps) {
+  // Check if we are in a pure static workspace preview deployment (e.g. GitHub Pages)
+  const isStaticHost = useMemo(() => {
+    return (
+      window.location.hostname.includes('github.io') ||
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname === ''
+    );
+  }, []);
+
   // Compute recent stats
   const activeLogs = useMemo(() => {
     return logs.slice(0, 5);
@@ -183,6 +192,52 @@ export default function Dashboard({
   return (
     <div id="sms-dashboard" className="space-y-6">
       
+      {/* Standalone Single File Companion Announcement Banner */}
+      <div className="bg-indigo-50 border border-indigo-100 text-indigo-950 p-4 rounded-xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in duration-350">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-indigo-100 text-indigo-700 rounded-lg shrink-0 mt-0.5">
+            <Sparkles size={16} />
+          </div>
+          <div>
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+              <span>🚀 Standalone Single-File Bulk SMS Sender Available!</span>
+              <span className="text-[9px] bg-indigo-600 text-white font-bold px-1.5 py-0.5 rounded-full uppercase">new</span>
+            </h4>
+            <p className="text-[11px] text-slate-600 leading-normal mt-1">
+              Need a simple, one-click file to upload on GitHub and visit instantly via GitHub Pages? We created <span className="font-mono bg-indigo-100/70 text-indigo-950 px-1 py-0.5 rounded font-bold">easysend-sms-sender.html</span> just for you! It parses CSV sheets, calculates character metrics, renders live mockup previews, and broadcasts SMS directly using EasySend's API.
+            </p>
+          </div>
+        </div>
+        <a 
+          href="easysend-sms-sender.html" 
+          target="_blank" 
+          className="text-xs font-bold text-white bg-indigo-600 hover:bg-brand-700 px-4 py-2 rounded-lg flex items-center gap-1.5 transition-all w-full md:w-auto justify-center shadow-xs shrink-0 select-none cursor-pointer"
+        >
+          Open Standalone File <ArrowUpRight size={13} />
+        </a>
+      </div>
+
+      {/* CORS Alert Banner for Pure Static Hosts */}
+      {isStaticHost && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-4 rounded-r-xl shadow-xs space-y-2 animate-in fade-in duration-300">
+          <div className="flex items-start gap-2.5">
+            <div className="mt-0.5 p-1 bg-amber-100 rounded text-amber-700 shrink-0">
+              <Info size={16} />
+            </div>
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-wider text-amber-800">CORS Browser Policy Notification (Static Hosting Detected)</h4>
+              <p className="text-[11px] text-amber-900/90 leading-relaxed mt-1">
+                This app is running in a static web environment (<span className="font-mono bg-amber-100 px-1 rounded text-amber-950 font-bold">{window.location.hostname}</span>). 
+                Web browsers enforce <strong>CORS (Cross-Origin Resource Sharing) restrictions</strong> blockages for standard client-side API requests. Direct, raw HTTP fetches from the browser to SMS gateways like EasySend or Twilio are blocked by browser policy, causing <span className="font-mono bg-red-100 px-1 rounded text-red-900 font-bold">Failed</span> logs.
+              </p>
+              <p className="text-[10.5px] text-amber-800 font-medium leading-relaxed mt-1.5">
+                💡 <strong>To Enable Actual Sends (No CORS restriction):</strong> Run the application on a server container environment (such as Google Cloud Run or Render). When hosted as a full Node.js app, our built-in backend router proxy (<span className="font-mono text-[9.5px] bg-amber-100 px-1 rounded">server.ts</span>) handles your SMS requests smoothly server-to-server, bypassing browser CORS blockades completely!
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Admin Alert Notification */}
       {currentUser.role === 'admin' && rechargeRequests.some(r => r.status === 'pending') && (
         <div className="bg-orange-50 border border-orange-200 text-orange-800 p-3 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">

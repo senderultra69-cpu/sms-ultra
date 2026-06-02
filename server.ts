@@ -6,7 +6,7 @@ import { createServer as createViteServer } from 'vite';
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -366,6 +366,12 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('Critical failure during server initiation:', err);
-});
+// Export default app to be consumed as a Serverless function (e.g. on Vercel)
+export default app;
+
+// Only start the standalone express server if we are NOT running as a Vercel serverless function
+if (!process.env.VERCEL) {
+  startServer().catch((err) => {
+    console.error('Critical failure during server initiation:', err);
+  });
+}

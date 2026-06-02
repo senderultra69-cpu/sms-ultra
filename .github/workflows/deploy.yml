@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # (अगर आपकी डिफ़ॉल्ट ब्रांच master है तो इसे master कर दें)
+      - main # change to master if your default branch is master
 
 permissions:
   contents: write
@@ -31,5 +31,5 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist # जहाँ बिल्ड वेब फाइल्स मौजूद हैं
-          branch: gh-pages # जिस ब्रांच पर गिट-पेजेस होस्ट होगा
+          folder: dist # The folder where build files are generated
+          branch: gh-pages # The branch the action will deploy to
